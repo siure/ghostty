@@ -116,6 +116,14 @@ pub fn initShared(
     });
     _ = try deps.add(lib);
 
+    // The Linux embedded library is loaded into a non-Ghostty host process.
+    // Keep vendored dependency symbols out of the dynamic namespace and expose
+    // only the C ABI consumed by cmux. The tracked version script makes ABI
+    // changes explicit in review and is enforced by the ELF linker.
+    if (deps.config.target.result.os.tag == .linux) {
+        lib.setVersionScript(b.path("src/build/ghostty-internal-linux.map"));
+    }
+
     // On Windows with MSVC, building a DLL requires the full CRT library
     // chain. linkLibC() (called via deps.add) provides msvcrt.lib, but
     // that references symbols in vcruntime.lib and ucrt.lib. Zig's library
