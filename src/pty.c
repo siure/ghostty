@@ -8,10 +8,14 @@
 #elif defined(__linux__)
 
   #define _GNU_SOURCE // ptsname_r
+  #include <stddef.h> // size_t
   #include <pty.h> // openpty
-  #include <stdlib.h> // ptsname_r
   #include <sys/ioctl.h> // ioctl and constants
   #include <unistd.h> // tcgetpgrp, setsid
+
+  // Keep this declaration narrow instead of including stdlib.h. Zig 0.16's
+  // translate-c cannot compile glibc's fortified ptsname_r inline wrapper.
+  extern int ptsname_r(int, char *, size_t);
 
 #elif defined(__APPLE__)
 
